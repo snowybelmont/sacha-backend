@@ -7,6 +7,7 @@ const Schema = new mongoose.Schema({
     required: true,
   },
   qrcode: { type: String, required: true },
+  code: { type: Number, required: true, unique: true },
   date_create: { type: Date, default: Date.now, required: true },
 });
 

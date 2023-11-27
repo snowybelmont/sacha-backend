@@ -100,10 +100,19 @@ router.post("/generate", async (req, res) => {
         },
       };
 
-      const qrCodeData = JSON.stringify({
-        professor_id: newId,
-        date_create: new Date(),
-      });
+      async function generateCode() {
+        let code = Math.floor(100000 + Math.random() * 900000);
+
+        while (await QRCode.exists({ code: code })) {
+          code = Math.floor(100000 + Math.random() * 900000);
+        }
+
+        return code;
+      }
+
+      const newCode = await generateCode();
+
+      const qrCodeData = JSON.stringify(newCode);
 
       qrCodeGen.toString(qrCodeData, qrCodeOptions, async (err, qrCodeSVG) => {
         if (err) {
@@ -113,6 +122,7 @@ router.post("/generate", async (req, res) => {
         const qrObj = {
           professor_id: newId,
           qrcode: qrCodeSVG,
+          code: newCode,
         };
 
         const qr = await QRCode.create(qrObj);
