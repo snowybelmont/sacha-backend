@@ -30,7 +30,7 @@ router.get("/all", async (req, res) => {
         });
       } else {
         res.status(200).json({
-          message: users.length + "usuários encontrados",
+          message: `${users.length} usuários encontrados`,
           formattedData,
         });
       }
