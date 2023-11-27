@@ -1,6 +1,6 @@
 require("dotenv").config();
 const pup = require("puppeteer");
-const PROD = false;
+const PROD = process.env.PROD || false;
 
 const urlBase = "https://www.fateconline.com.br/sistema";
 let initalError;
