@@ -79,7 +79,7 @@ router.post("/createManual", async (req, res) => {
         .status(409)
         .json({ message: "Um usuário com esse endereço de e-mail já existe" });
     } else {
-      User.create(req.body);
+      await User.create(req.body);
       res.status(201).json({ message: "Usúario criado" });
     }
   } catch (err) {
