@@ -154,6 +154,9 @@ async function Scrap({ email, password, type }) {
 
     state = await Login(page, email, password);
 
+    console.log(state);
+    console.log(initalError);
+
     if (state === null || initalError === "Não foi possível fazer o login") {
       throw new Error("Não foi possível fazer o login");
     }
