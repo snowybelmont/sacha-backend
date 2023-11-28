@@ -7,6 +7,7 @@ const PORT = process.env.PORT || 3001;
 
 const userController = require("./controllers/user");
 const qrController = require("./controllers/qr");
+const presencesController = require("./controllers/presence");
 
 app.use(cors());
 app.use((req, res, next) => {
@@ -18,6 +19,7 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 app.use("/users", userController);
 app.use("/qrcode", qrController);
+app.use("/presences", presencesController);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

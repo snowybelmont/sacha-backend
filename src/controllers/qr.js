@@ -25,7 +25,7 @@ router.get("/all", async (req, res) => {
         });
       }
     } else {
-      res.status(404).json({ message: "Nenhum qr code encontrado" });
+      return res.status(404).json({ message: "Nenhum qr code encontrado" });
     }
   } catch (err) {
     console.log(err);
@@ -58,7 +58,7 @@ router.get("/teacher", async (req, res) => {
     await database.connection();
     const user = await User.findById(newId);
 
-    if (user) {
+    if (user && user.type !== "aluno") {
       const qrs = await QRCode.find({ professor_id: newId });
 
       if (qrs.length === 1) {
@@ -127,7 +127,7 @@ router.post("/generate", async (req, res) => {
 
         const qr = await QRCode.create(qrObj);
         const find = await QRCode.findById(qr.id);
-        res.status(200).json({ message: "QR Code gerado", find });
+        res.status(201).json({ message: "QR Code gerado", find });
       });
     } else {
       return res.status(404).json({ message: "Usuário não encontrado" });
@@ -164,7 +164,7 @@ router.delete("/delete/teacher", async (req, res) => {
     await database.connection();
     const user = await User.findById(newId);
 
-    if (user) {
+    if (user && user.type !== "aluno") {
       const qrs = await QRCode.find({ professor_id: newId });
       await QRCode.deleteMany({ professor_id: newId });
 
