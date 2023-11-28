@@ -69,6 +69,31 @@ router.get("/single", async (req, res) => {
   }
 });
 
+router.get("/single/ra", async (req, res) => {
+  try {
+    const ra = req.query.ra;
+    await database.connection();
+    const user = await User.findOne({ RA: ra });
+
+    if (user) {
+      const formattedData = {
+        Nome: user.name,
+        Tipo: user.type,
+        Foto: user.photo,
+        Curso: user.curse,
+        Periodo: user.periode,
+        Classe: user.class,
+      };
+      res.status(200).json({ message: "Usuário encontrado", formattedData });
+    } else {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Erro interno do servidor" });
+  }
+});
+
 router.post("/createManual", async (req, res) => {
   try {
     await database.connection();

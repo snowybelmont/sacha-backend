@@ -1,6 +1,6 @@
 require("dotenv").config();
 const pup = require("puppeteer");
-const PROD = true;
+const PROD = false;
 
 const urlBase = "https://www.fateconline.com.br/sistema";
 let initalError;
@@ -81,13 +81,18 @@ async function ExtractData(page, email, password, type) {
       nRA.map((option) => option.text)
     );
     RA = RA[1];
-    const discipline = await page.$$eval(".sorting_1 > small", (nClass) =>
-      nClass.map((small) => small.innerText)
-    );
+    const selector = "td.sorting_1";
+    const discipline = await page.evaluate((selector) => {
+      const tds = document.querySelectorAll(selector);
+
+      return Array.from(tds, (td) => td.textContent.trim());
+    }, selector);
+
     const photo = await page.$eval('img[id="ImgMiniatura"]', (img) => img.src);
 
     await page.waitForSelector(".navbar-custom-menu");
     await page.click(".navbar-custom-menu");
+    await page.waitForSelector(".btn");
 
     await Promise.all([page.waitForNavigation(), page.click(".btn")]);
 
@@ -172,6 +177,7 @@ async function Scrap({ email, password, type }) {
       throw new Error("Sem nenhum dado");
     }
 
+    await browser.close();
     return userData;
   } catch (err) {
     console.log(err);
