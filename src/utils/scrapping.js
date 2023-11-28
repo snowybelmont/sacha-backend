@@ -185,8 +185,10 @@ async function Scrap({ email, password, type }) {
   } catch (err) {
     console.log(err);
     if (!initalError) {
+      await browser.close();
       return (initalError = "Não foi possível extrair os dados");
     } else {
+      await browser.close();
       return null;
     }
   }
