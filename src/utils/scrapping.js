@@ -3,8 +3,8 @@ const pup = require("puppeteer");
 const PROD = true;
 
 const urlBase = "https://www.fateconline.com.br/sistema";
-let userData = null;
 let browser = null;
+let data = null;
 
 async function Scrap({ email, password, type }) {
   try {
@@ -114,7 +114,7 @@ async function Scrap({ email, password, type }) {
         (input) => input.value
       );
 
-      const data = {
+      data = {
         RA: RA.substr(5, 8).trim(),
         name: name,
         email: email,
@@ -132,7 +132,7 @@ async function Scrap({ email, password, type }) {
     }
 
     await browser.close();
-    return userData;
+    return data;
   } catch (err) {
     console.log(err);
     await browser.close();
