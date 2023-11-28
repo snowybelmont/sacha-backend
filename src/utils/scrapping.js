@@ -3,7 +3,6 @@ const pup = require("puppeteer");
 const PROD = true;
 
 const urlBase = "https://www.fateconline.com.br/sistema";
-let initalError = null;
 let userData = null;
 let browser = null;
 
@@ -56,9 +55,6 @@ async function Scrap({ email, password, type }) {
     if (alert !== "" && alert !== null) {
       throw new Error("Login Incorreto");
     }
-
-    console.log(state);
-    console.log(initalError);
 
     if (type === "aluno") {
       if (page.url() === `${urlBase}/Paginas/Professores/`) {
@@ -139,13 +135,8 @@ async function Scrap({ email, password, type }) {
     return userData;
   } catch (err) {
     console.log(err);
-    if (!initalError) {
-      await browser.close();
-      return (initalError = "Não foi possível extrair os dados");
-    } else {
-      await browser.close();
-      return null;
-    }
+    await browser.close();
+    return null;
   }
 }
 
