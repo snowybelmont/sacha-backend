@@ -54,6 +54,44 @@ router.get("/single", async (req, res) => {
   }
 });
 
+router.get("/single/ra", async (req, res) => {
+  try {
+    const id = req.query.id;
+    const code = req.query.code;
+    const newId = await normalizeId(id);
+    await database.connection();
+    const user = await User.findById(newId);
+
+    if (user) {
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const newCode = await QRCode.findOne({ code: code });
+
+      const presence = await Presence.findOne({
+        $and: [
+          { estudant_RA: user.RA },
+          { professor_id: newCode.professor_id },
+          { date_create: { $gte: today } },
+        ],
+      });
+
+      if (presence) {
+        res.status(401).json({
+          message: `1 presença encontrada`,
+          presence,
+        });
+      } else {
+        res.status(200).json({ message: "Nenhuma presença encontrada" });
+      }
+    } else {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Erro interno do servidor" });
+  }
+});
+
 router.get("/teacher", async (req, res) => {
   try {
     const id = req.query.id;
@@ -124,7 +162,7 @@ router.post("/register", async (req, res) => {
     const user = await User.findById(newId);
 
     if (user) {
-      const newCode = await Presence.findOne({ code: req.body.code });
+      const newCode = await QRCode.findOne({ code: req.body.code });
 
       const presenceObj = {
         estudant_RA: user.RA,
