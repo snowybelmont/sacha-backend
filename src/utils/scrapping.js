@@ -5,7 +5,7 @@ async function Scrap({ email, password, type }) {
   const urlBase = "https://www.fateconline.com.br/sistema";
   let data = null;
   let cluster = null;
-  const PROD = false;
+  const PROD = true;
   const saltRounds = 10;
 
   try {
