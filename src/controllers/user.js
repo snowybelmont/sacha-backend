@@ -7,6 +7,7 @@ const { User } = require("../models/users");
 
 const { Scrap } = require("../utils/scrapping");
 const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 router.get("/all", async (req, res) => {
   try {
@@ -105,7 +106,20 @@ router.post("/createManual", async (req, res) => {
         .status(409)
         .json({ message: "Um usuário com esse endereço de e-mail já existe" });
     } else {
-      await User.create(req.body);
+      const hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
+
+      data = {
+        RA: req.body.RA,
+        name: req.body.name,
+        email: req.body.email,
+        password: hashedPassword,
+        type: req.body.type,
+        photo: req.body.photo,
+        curse: req.body.curse,
+        periode: req.body.periode,
+        class: req.body.class,
+      };
+      await User.create(data);
       res.status(201).json({ message: "Usúario criado" });
     }
   } catch (err) {
