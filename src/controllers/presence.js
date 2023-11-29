@@ -191,7 +191,7 @@ router.delete("/delete/single", async (req, res) => {
     const presence = await Presence.findById(newId);
 
     if (presence) {
-      await Presence.findOneAndDelete(presence.id);
+      await Presence.findByIdAndDelete(presence.id);
       res.status(204).json({ message: "Presença excluída" });
     } else {
       return res.status(404).json({ message: "Presença não encontrada" });

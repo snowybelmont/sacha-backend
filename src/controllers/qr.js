@@ -146,7 +146,7 @@ router.delete("/delete/single", async (req, res) => {
     const qr = await QRCode.findById(newId);
 
     if (qr) {
-      await QRCode.findOneAndDelete(qr.id);
+      await QRCode.findByIdAndDelete(qr.id);
       res.status(204).json({ message: "Qr code excluído" });
     } else {
       return res.status(404).json({ message: "Qr code não encontrado" });

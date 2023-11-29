@@ -6,6 +6,7 @@ const database = require("../utils/database");
 const { User } = require("../models/users");
 
 const { Scrap } = require("../utils/scrapping");
+const bcrypt = require("bcrypt");
 
 router.get("/all", async (req, res) => {
   try {
@@ -129,7 +130,11 @@ router.post("/create", async (req, res) => {
       const data = await User.findOne({ email: req.body.email });
       res.status(201).json({ message: "Usuário criado", token: data.id });
     } else {
-      if (req.body.password !== user.password) {
+      const isPasswordCorrect = await bcrypt.compare(
+        req.body.password,
+        user.password
+      );
+      if (!isPasswordCorrect) {
         return res.status(401).json({ message: "Senha incorreta" });
       } else {
         if (req.body.type !== user.type) {
@@ -161,7 +166,7 @@ router.delete("/delete", async (req, res) => {
     const user = await User.findById(newId);
 
     if (user) {
-      await User.findOneAndDelete(user.id);
+      await User.findByIdAndDelete(user.id);
       res.status(204).json({ message: "Usuário excluído" });
     } else {
       return res.status(404).json({ message: "Usário não encontrado" });
