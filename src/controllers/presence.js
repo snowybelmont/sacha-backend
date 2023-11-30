@@ -8,6 +8,7 @@ const { User } = require("../models/users");
 const { Presence } = require("../models/presences");
 
 router.get("/all", async (req, res) => {
+  console.log("Me chamaram");
   try {
     await database.connection();
     const presences = await Presence.find();
