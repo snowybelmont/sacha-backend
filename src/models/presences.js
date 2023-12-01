@@ -9,6 +9,7 @@ const Schema = new mongoose.Schema({
   },
   code: { type: Number, required: true },
   fingerprint: { type: String, required: true },
+  class: { type: String, required: true },
   date_create: { type: Date, default: Date.now, required: true },
 });
 

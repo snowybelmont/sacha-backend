@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const { DateTime } = require("luxon");
 const router = Router();
 
 const { normalizeId } = require("../utils/normalizeid");
@@ -162,6 +163,36 @@ router.post("/register", async (req, res) => {
     await database.connection();
     const user = await User.findById(newId);
 
+    const codesPerDay = {
+      1: "11933",
+      2: "11934",
+      3: { 1: "11935", 2: "11938" },
+      4: "11936",
+      5: "11937",
+    };
+
+    const today = new Date().getDay();
+    const expectedCode = codesPerDay[today];
+
+    let index = null;
+
+    if (today === 1 || today === 2 || today === 4 || today === 5) {
+      index = user.class.findIndex((item) => item.startsWith(expectedCode));
+    } else if (today === 3) {
+      const subCodes = Object.values(expectedCode);
+      const now = DateTime.local().setZone("America/Sao_Paulo");
+
+      if (now.hour >= 19 && now.hour < 20 && now.minute <= 40) {
+        index = user.class.findIndex((item) => item.startsWith(subCodes[1]));
+      } else if (
+        (now.hour === 20 && now.minute >= 50) ||
+        (now.hour > 20 && now.hour < 22) ||
+        (now.hour === 22 && now.minute <= 30)
+      ) {
+        index = user.class.findIndex((item) => item.startsWith(subCodes[2]));
+      }
+    }
+
     if (user) {
       const newCode = await QRCode.findOne({ code: req.body.code });
 
@@ -170,6 +201,7 @@ router.post("/register", async (req, res) => {
         professor_id: newCode.professor_id,
         code: newCode.code,
         fingerprint: req.body.fingerprint,
+        class: user.class[index].substring(8),
       };
 
       const presence = await Presence.create(presenceObj);
