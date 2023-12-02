@@ -186,7 +186,7 @@ router.post("/register", async (req, res) => {
         index = user.class.findIndex((item) => item.startsWith(subCodes[1]));
       } else if (
         (now.hour === 20 && now.minute >= 50) ||
-        (now.hour > 20 && now.hour < 22) ||
+        (now.hour >= 21 && now.minute <= 59) ||
         (now.hour === 22 && now.minute <= 30)
       ) {
         index = user.class.findIndex((item) => item.startsWith(subCodes[2]));
@@ -201,7 +201,7 @@ router.post("/register", async (req, res) => {
         professor_id: newCode.professor_id,
         code: newCode.code,
         fingerprint: req.body.fingerprint,
-        class: user.class[index].substring(8),
+        class: user.class[index ?? 2].substring(8),
       };
 
       const presence = await Presence.create(presenceObj);
@@ -277,14 +277,76 @@ router.delete("/delete/estudant", async (req, res) => {
 
     if (user && user.type !== "professor") {
       const presences = await Presence.find({ estudant_RA: user.RA });
-      await Presence.deleteMany({ estudant_RA: user.RA });
 
       if (presences.length === 1) {
+        await Presence.deleteMany({ estudant_RA: user.RA });
         res.status(204).json({
           message: `${presences.length} presença excluida`,
           presences,
         });
       } else if (presences.length > 1) {
+        await Presence.deleteMany({ estudant_RA: user.RA });
+        res.status(204).json({
+          message: `${presences.length} presenças excluidas`,
+          presences,
+        });
+      } else {
+        return res.status(404).json({ message: `Nenhuma presença encontrada` });
+      }
+    } else {
+      return res.status(404).json({ message: "Aluno não encontrado" });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Erro interno do servidor" });
+  }
+});
+
+router.delete("/delete/info", async (req, res) => {
+  try {
+    const { data } = req.body;
+    await database.connection();
+    const students = await User.find({
+      RA: { $in: data.map((entry) => entry.ra) },
+    });
+    const foundStudentRAs = students.map((student) => student.RA);
+    const foundStudentRAsSet = new Set(foundStudentRAs.map(String));
+    const filteredData = data.filter((entry) => {
+      const entryRA = String(entry.ra);
+      return foundStudentRAsSet.has(entryRA);
+    });
+
+    if (filteredData.length > 0) {
+      const presences = await Presence.find({
+        $or: filteredData.map((entry) => ({
+          estudant_RA: entry.ra,
+          code: entry.code,
+          date_create: entry.date,
+        })),
+      });
+
+      if (presences.length === 1) {
+        await Presence.deleteMany({
+          $or: filteredData.map((entry) => ({
+            estudant_RA: entry.ra,
+            code: entry.code,
+            date_create: entry.date,
+          })),
+        });
+
+        res.status(204).json({
+          message: `${presences.length} presenças excluidas`,
+          presences,
+        });
+      } else if (presences.length > 1) {
+        await Presence.deleteMany({
+          $or: filteredData.map((entry) => ({
+            estudant_RA: entry.ra,
+            code: entry.code,
+            date_create: entry.date,
+          })),
+        });
+
         res.status(204).json({
           message: `${presences.length} presenças excluidas`,
           presences,
